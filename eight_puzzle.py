@@ -76,32 +76,49 @@ def hamming(state):
     return count
 
 # Manhattan heuristic: returns the sum of distances each tile is from its goal
+# "how many steps away from the goal is the tile?"
 def manhattan(state):
     distance = 0
+    # iterate through each tile
     for i in range(3):
         for j in range(3):
             tile = state[i][j]
+            # ignore blank tile
             if tile != 0:
+                # these two lines give the row/col where the tile actually belongs
                 goal_row = tile // 3
                 goal_col = tile % 3
+                # abs gives absolute values (no negatives)
+                # first term is vertical steps, second term is horizontal steps
                 distance += abs(i - goal_row) + abs(j - goal_col)
     return distance
 
+# this method produces the next board state to consider/expand
 def get_neighbors(state):
-    # generate possible moves
+    # initialize list
     neighbors = []
+    # find coordinates of the blank tile
     i, j = find_blank(state)
+    # define the four possible moves
     moves = [(-1, 0, 'UP'), (1, 0, 'DOWN'), (0, -1, 'LEFT'), (0, 1, 'RIGHT')]
 
+    # try each direction; compute target coordinates (ni, nj) where the blank would land
     for di, dj, move in moves:
         ni, nj = i + di, j + dj
+        # the if clause is a boundary check - we must stay inside the 3x3 grid
         if 0 <= ni < 3 and 0 <= nj < 3:
-            # swap blank with neighbor
+            # turn state (tuple of tuples) into a list of lists so we can swap elements
             new_state = [list(row) for row in state]
+            # value at the blank [i][j] and value at [ni][nj] is swapped
             new_state[i][j], new_state[ni][nj] = new_state[ni][nj], new_state[i][j]
+            # after the swap, convert list of lists back into tuple of tuples
             new_state = tuple(tuple(row) for row in new_state)
+            # records result as a pair
+            # new_state =  board after the move
+            # move = name of move (UP, DOWN etc)
             neighbors.append((new_state, move))
 
+    # return list of up to 4 neighbors
     return neighbors
 
 def solve(start, heuristic='manhattan'):
